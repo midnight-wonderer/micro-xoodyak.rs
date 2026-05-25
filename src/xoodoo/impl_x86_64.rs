@@ -1,12 +1,13 @@
 use core::arch::x86_64::*;
 
-use super::{Xoodoo, ROUND_KEYS};
+use super::{ROUND_KEYS, Xoodoo};
 
 impl Xoodoo {
     #[allow(
         non_upper_case_globals,
         clippy::many_single_char_names,
-        clippy::cast_ptr_alignment
+        clippy::cast_ptr_alignment,
+        clippy::erasing_op
     )]
     pub fn permute(&mut self) {
         let st = &mut self.st;

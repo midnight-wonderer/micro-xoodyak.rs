@@ -1,6 +1,6 @@
 use core::arch::asm;
 
-use super::{Xoodoo, ROUND_KEYS};
+use super::{ROUND_KEYS, Xoodoo};
 
 impl Xoodoo {
     /// Optimized Xoodoo permutation for ARMv6-M (Cortex-M0).

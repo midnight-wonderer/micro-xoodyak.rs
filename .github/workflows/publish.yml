@@ -1,0 +1,71 @@
+name: Publish to Crates.io
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Test, Publish & Sync
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install just
+        uses: taiki-e/install-action@just
+
+      - name: Run lints
+        run: just lint
+
+      - name: Run all tests
+        run: just test-all
+
+      - name: Set version and Sync
+        run: |
+          # Extract version from tag (e.g. v0.1.2 -> 0.1.2)
+          VERSION=${{ github.event.release.tag_name }}
+          VERSION=${VERSION#v}
+          echo "Setting version to $VERSION"
+          
+          # Update Cargo.toml
+          sed -i "0,/^version = \".*\"/s//version = \"$VERSION\"/" Cargo.toml
+          
+          # Update README.md
+          sed -i "s/micro-xoodyak = \".*\"/micro-xoodyak = \"$VERSION\"/" README.md
+          
+          # Update Cargo.lock to match
+          cargo update -p micro-xoodyak
+          
+          # Configure Git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Commit and Push back only if there are changes
+          git add Cargo.toml Cargo.lock README.md
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump version to $VERSION [skip ci]"
+            
+            # Force-update the tag to the new commit so they stay in sync
+            git tag -f ${{ github.event.release.tag_name }}
+            
+            # Push the branch and the updated tag
+            git push origin HEAD:${{ github.event.repository.default_branch }}
+            git push origin ${{ github.event.release.tag_name }} --force
+          else
+            echo "Version in Cargo.toml and Cargo.lock is already $VERSION. Skipping commit."
+          fi
+
+      - name: Publish to Crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}

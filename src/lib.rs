@@ -12,8 +12,8 @@ mod xoodyak;
 pub use crate::error::Error as XoodyakError;
 pub use crate::xoodoo::Xoodoo;
 pub use crate::xoodyak::{
-    Tag as XoodyakTag, XoodyakAny, XoodyakCommon, XoodyakHash, XoodyakKeyed,
-    AUTH_TAG_BYTES as XOODYAK_AUTH_TAG_BYTES,
+    AUTH_TAG_BYTES as XOODYAK_AUTH_TAG_BYTES, Tag as XoodyakTag, XoodyakAny, XoodyakCommon,
+    XoodyakHash, XoodyakKeyed,
 };
 
 #[cfg(test)]
