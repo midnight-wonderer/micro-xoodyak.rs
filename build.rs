@@ -20,27 +20,25 @@ fn main() {
     let force_riscv32_e =
         env::var("FORCE_RISCV32_E").is_ok() || env::var("CROSS_FORCE_RISCV32_E").is_ok();
 
-    if force_thumb1 {
-        println!("cargo:rustc-cfg=thumb1");
-    } else if force_thumb2 {
-        println!("cargo:rustc-cfg=thumb2");
-    } else if target.contains("thumbv7")
+    let is_thumb2_target = target.contains("thumbv7")
         || target.contains("thumbv8m.main")
         || target.contains("thumbv8r")
         || target.contains("armv7")
         || target.contains("armv8")
-        || target.contains("armv9")
-    {
-        println!("cargo:rustc-cfg=thumb2");
-    } else if target.contains("thumbv4")
+        || target.contains("armv9");
+
+    let is_thumb1_target = target.contains("thumbv4")
         || target.contains("thumbv5")
         || target.contains("thumbv6")
         || target.contains("thumbv8m.base")
         || target.contains("armv4")
         || target.contains("armv5")
-        || target.contains("armv6")
-    {
+        || target.contains("armv6");
+
+    if force_thumb1 || (!force_thumb2 && is_thumb1_target) {
         println!("cargo:rustc-cfg=thumb1");
+    } else if force_thumb2 || is_thumb2_target {
+        println!("cargo:rustc-cfg=thumb2");
     }
 
     if target.contains("riscv32") {

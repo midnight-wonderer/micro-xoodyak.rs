@@ -1,5 +1,5 @@
 use benchmark_simple::*;
-use xoodyak::*;
+use micro_xoodyak::*;
 
 fn main() {
     let bench = Bench::new();
