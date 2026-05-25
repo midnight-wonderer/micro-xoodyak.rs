@@ -306,7 +306,6 @@ impl Xoodoo {
                 out("t0") _, out("t1") _, out("t2") _,
                 out("s0") _, out("s1") _,
                 out("a3") _, out("a4") _, out("a5") _,
-                options(nostack),
             );
         }
     }
