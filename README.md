@@ -33,7 +33,7 @@ Add `micro-xoodyak` to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-micro-xoodyak = "0.8"
+micro-xoodyak = "0.0.1"
 ```
 
 ### Features
