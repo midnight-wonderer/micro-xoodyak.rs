@@ -1,6 +1,6 @@
 [package]
 name = "micro-xoodyak"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Sarun Rattanasiri"]
 edition = "2024"
 description = "A lightweight, zero-allocation implementation of the Xoodyak cryptographic scheme, optimized for 32-bit microcontrollers (ARM Cortex-M, RISC-V)."
