@@ -2,8 +2,12 @@ use zeroize::Zeroize;
 
 use crate::error::Error;
 
+/// The standard authentication tag size (16 bytes) for Xoodyak AEAD.
 pub const AUTH_TAG_BYTES: usize = 16;
 
+/// An authentication tag produced by AEAD encryption.
+///
+/// Can be verified against expected values and is automatically zeroized on drop.
 #[derive(Clone, Debug, Default, Eq)]
 pub struct Tag([u8; AUTH_TAG_BYTES]);
 

@@ -1,15 +1,15 @@
 [package]
-name = "xoodyak"
-version = "0.8.4"
-authors = ["Frank Denis <github@pureftpd.org>"]
+name = "micro-xoodyak"
+version = "0.9.0"
+authors = ["Sarun Rattanasiri"]
 edition = "2024"
-description = "Xoodyak / Xoodoo - A versatile cryptographic scheme that can be used for hashing, encryption, MAC computation and authenticated encryption."
+description = "A lightweight, zero-allocation implementation of the Xoodyak cryptographic scheme, optimized for 32-bit microcontrollers (ARM Cortex-M, RISC-V)."
 readme = "README.md"
-keywords = ["crypto", "xoodyak", "xoodoo", "cyclist"]
+keywords = ["xoodyak", "embedded", "cortex-m", "riscv", "aead"]
 license = "MIT"
-homepage = "https://github.com/jedisct1/rust-xoodyak"
-repository = "https://github.com/jedisct1/rust-xoodyak"
-categories = ["no-std", "cryptography", "wasm"]
+homepage = "https://github.com/midnight-wonderer/micro-xoodyak"
+repository = "https://github.com/midnight-wonderer/micro-xoodyak"
+categories = ["embedded", "cryptography", "no-std", "no-std::no-alloc"]
 
 [features]
 default = []
@@ -33,3 +33,8 @@ codegen-units = 1
 [[bench]]
 name = "benchmark"
 harness = false
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+

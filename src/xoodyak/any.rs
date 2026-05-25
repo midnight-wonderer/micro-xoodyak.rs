@@ -4,9 +4,14 @@ use super::*;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 
+/// A dynamic wrapper enum that holds either a `Hash` or a `Keyed` Xoodyak instance.
+///
+/// Convenient for protocol steps where the mode of operation might transition.
 #[derive(Clone, Debug)]
 pub enum XoodyakAny {
+    /// Unkeyed variant.
     Hash(XoodyakHash),
+    /// Keyed variant.
     Keyed(XoodyakKeyed),
 }
 
@@ -158,18 +163,21 @@ impl XoodyakAny {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn encrypt_to_vec(&mut self, bin: &[u8]) -> Result<Vec<u8>, Error> {
         self.keyed()?.encrypt_to_vec(bin)
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn decrypt_to_vec(&mut self, bin: &[u8]) -> Result<Vec<u8>, Error> {
         self.keyed()?.decrypt_to_vec(bin)
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn aead_encrypt_to_vec_detached(
         &mut self,
@@ -180,18 +188,21 @@ impl XoodyakAny {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn aead_encrypt_to_vec(&mut self, bin: Option<&[u8]>) -> Result<Vec<u8>, Error> {
         self.keyed()?.aead_encrypt_to_vec(bin)
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn aead_encrypt_in_place_to_vec(&mut self, in_out: Vec<u8>) -> Result<Vec<u8>, Error> {
         Ok(self.keyed()?.aead_encrypt_in_place_to_vec(in_out))
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn aead_decrypt_to_vec_detached(
         &mut self,
@@ -203,12 +214,14 @@ impl XoodyakAny {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn aead_decrypt_to_vec(&mut self, bin: &[u8]) -> Result<Vec<u8>, Error> {
         self.keyed()?.aead_decrypt_to_vec(bin)
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     #[inline]
     pub fn aead_decrypt_in_place_to_vec(&mut self, in_out: Vec<u8>) -> Result<Vec<u8>, Error> {
         self.keyed()?.aead_decrypt_in_place_to_vec(in_out)

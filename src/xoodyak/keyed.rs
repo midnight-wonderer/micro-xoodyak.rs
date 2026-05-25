@@ -5,6 +5,9 @@ use super::*;
 #[cfg(feature = "alloc")]
 use alloc::{vec, vec::Vec};
 
+/// A Xoodyak instance in keyed mode.
+///
+/// Used for encryption, decryption, MAC computation, and Authenticated Encryption (AEAD).
 #[derive(Clone, Debug)]
 pub struct XoodyakKeyed {
     state: Xoodoo,
@@ -47,6 +50,7 @@ impl internal::XoodyakCommon for XoodyakKeyed {
 impl XoodyakCommon for XoodyakKeyed {}
 
 impl XoodyakKeyed {
+    /// Creates a new keyed instance with a secret key and optional parameters (nonce, key ID, and counter).
     pub fn new(
         key: &[u8],
         nonce: Option<&[u8]>,
@@ -62,6 +66,7 @@ impl XoodyakKeyed {
         Ok(xoodyak)
     }
 
+    /// Absorbs a secret key and nonce into the state to initialize or update the keyed session.
     pub fn absorb_key_and_nonce(
         &mut self,
         key: &[u8],
@@ -98,6 +103,7 @@ impl XoodyakKeyed {
         Ok(())
     }
 
+    /// Rolls/updates the internal state, providing forward secrecy.
     pub fn ratchet(&mut self) {
         debug_assert_eq!(self.mode(), Mode::Keyed);
         let mut rolled_key = [0u8; RATCHET_RATE];
@@ -105,6 +111,7 @@ impl XoodyakKeyed {
         self.absorb_any(&rolled_key, RATCHET_RATE, 0x00);
     }
 
+    /// Encrypts the plaintext in `bin` and writes the resulting ciphertext into `out`.
     pub fn encrypt(&mut self, out: &mut [u8], bin: &[u8]) -> Result<(), Error> {
         debug_assert_eq!(self.mode(), Mode::Keyed);
         if out.len() < bin.len() {
@@ -125,6 +132,7 @@ impl XoodyakKeyed {
         Ok(())
     }
 
+    /// Decrypts the ciphertext in `bin` and writes the resulting plaintext into `out`.
     pub fn decrypt(&mut self, out: &mut [u8], bin: &[u8]) -> Result<(), Error> {
         debug_assert_eq!(self.mode(), Mode::Keyed);
         if out.len() < bin.len() {
@@ -145,6 +153,7 @@ impl XoodyakKeyed {
         Ok(())
     }
 
+    /// Encrypts the contents of the buffer `in_out` in-place.
     pub fn encrypt_in_place(&mut self, in_out: &mut [u8]) {
         debug_assert_eq!(self.mode(), Mode::Keyed);
         let mut tmp = [0u8; KEYED_SQUEEZE_RATE];
@@ -159,6 +168,7 @@ impl XoodyakKeyed {
         }
     }
 
+    /// Decrypts the contents of the buffer `in_out` in-place.
     pub fn decrypt_in_place(&mut self, in_out: &mut [u8]) {
         debug_assert_eq!(self.mode(), Mode::Keyed);
         let mut tmp = [0u8; KEYED_SQUEEZE_RATE];
@@ -187,6 +197,7 @@ impl XoodyakKeyed {
         Ok(auth_tag)
     }
 
+    /// Performs AEAD encryption, writing the ciphertext and appended tag into `out`.
     pub fn aead_encrypt(&mut self, out: &mut [u8], bin: Option<&[u8]>) -> Result<(), Error> {
         let ct_len = bin.unwrap_or_default().len();
         if out.len() < ct_len + AUTH_TAG_BYTES {
@@ -216,6 +227,7 @@ impl XoodyakKeyed {
         Err(Error::TagMismatch)
     }
 
+    /// Performs AEAD decryption, verifying the tag and writing the decrypted message to `out`.
     pub fn aead_decrypt(&mut self, out: &mut [u8], bin: &[u8]) -> Result<(), Error> {
         let ct_len = bin
             .len()
@@ -239,6 +251,7 @@ impl XoodyakKeyed {
         auth_tag
     }
 
+    /// Performs AEAD encryption in-place, appending the authentication tag directly to `in_out`.
     pub fn aead_encrypt_in_place(&mut self, in_out: &mut [u8]) -> Result<(), Error> {
         let ct_len = in_out
             .len()
@@ -264,6 +277,7 @@ impl XoodyakKeyed {
         Err(Error::TagMismatch)
     }
 
+    /// Performs AEAD decryption in-place, verifying the authentication tag and returning a slice of the plaintext.
     pub fn aead_decrypt_in_place<'t>(
         &mut self,
         in_out: &'t mut [u8],
@@ -281,6 +295,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn encrypt_to_vec(&mut self, bin: &[u8]) -> Result<Vec<u8>, Error> {
         let mut out = vec![0u8; bin.len()];
         self.encrypt(&mut out, bin)?;
@@ -288,6 +303,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn decrypt_to_vec(&mut self, bin: &[u8]) -> Result<Vec<u8>, Error> {
         let mut out = vec![0u8; bin.len()];
         self.decrypt(&mut out, bin)?;
@@ -295,6 +311,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn aead_encrypt_to_vec_detached(
         &mut self,
 
@@ -306,6 +323,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn aead_encrypt_to_vec(&mut self, bin: Option<&[u8]>) -> Result<Vec<u8>, Error> {
         let mut out = vec![0u8; bin.unwrap_or_default().len() + AUTH_TAG_BYTES];
         self.aead_encrypt(&mut out, bin)?;
@@ -313,6 +331,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn aead_encrypt_in_place_to_vec(&mut self, mut in_out: Vec<u8>) -> Vec<u8> {
         let ct_len = in_out.len();
         in_out.resize_with(ct_len + AUTH_TAG_BYTES, || 0);
@@ -321,6 +340,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn aead_decrypt_to_vec_detached(
         &mut self,
         auth_tag: Tag,
@@ -332,6 +352,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn aead_decrypt_to_vec(&mut self, bin: &[u8]) -> Result<Vec<u8>, Error> {
         let ct_len = bin
             .len()
@@ -343,6 +364,7 @@ impl XoodyakKeyed {
     }
 
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn aead_decrypt_in_place_to_vec(&mut self, mut in_out: Vec<u8>) -> Result<Vec<u8>, Error> {
         let ct_len = in_out
             .len()

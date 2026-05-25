@@ -20,6 +20,9 @@ const ROUND_KEYS: [u32; 12] = [
     0x058, 0x038, 0x3c0, 0x0d0, 0x120, 0x014, 0x060, 0x02c, 0x380, 0x0f0, 0x1a0, 0x012,
 ];
 
+/// The Xoodoo permutation state (48 bytes / 384 bits).
+///
+/// This is the core cryptographic permutation layer underlying the Xoodyak scheme.
 #[derive(Clone, Debug)]
 #[repr(align(4))]
 pub struct Xoodoo {

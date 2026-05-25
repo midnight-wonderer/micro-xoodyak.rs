@@ -119,12 +119,18 @@ mod internal {
     }
 }
 
+/// Common trait for all Xoodyak modes (unkeyed, keyed, and any).
+///
+/// This trait provides the core input-processing (`absorb`) and output-generation
+/// (`squeeze`) methods used in the Cyclist framework.
 pub trait XoodyakCommon: internal::XoodyakCommon {
+    /// Absorbs a slice of bytes into the state.
     #[inline(always)]
     fn absorb(&mut self, bin: &[u8]) {
         self.absorb_any(bin, self.absorb_rate(), 0x03);
     }
 
+    /// Absorbs additional bytes in a streaming fashion.
     #[inline]
     fn absorb_more(&mut self, bin: &[u8], rate: usize) {
         for chunk in bin.chunks(rate) {
@@ -133,16 +139,19 @@ pub trait XoodyakCommon: internal::XoodyakCommon {
         }
     }
 
+    /// Squeezes pseudo-random bytes from the state into the provided buffer.
     #[inline(always)]
     fn squeeze(&mut self, out: &mut [u8]) {
         self.squeeze_any(out, 0x40);
     }
 
+    /// Squeezes key-derivation bytes from the state into the provided buffer.
     #[inline(always)]
     fn squeeze_key(&mut self, out: &mut [u8]) {
         self.squeeze_any(out, 0x20);
     }
 
+    /// Squeezes additional bytes in a streaming fashion.
     #[inline]
     fn squeeze_more(&mut self, out: &mut [u8]) {
         for chunk in out.chunks_mut(self.squeeze_rate()) {
@@ -151,7 +160,9 @@ pub trait XoodyakCommon: internal::XoodyakCommon {
         }
     }
 
+    /// Squeezes pseudo-random bytes and returns them in a new `Vec<u8>`.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn squeeze_to_vec(&mut self, len: usize) -> Vec<u8> {
         let mut out = vec![0u8; len];
         self.squeeze(&mut out);
