@@ -38,3 +38,8 @@ harness = false
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
+[[bin]]
+name = "riscv_test"
+path = "qemu-tests/riscv_test.rs"
+
+
