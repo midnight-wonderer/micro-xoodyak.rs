@@ -1,6 +1,9 @@
 use super::internal::{Mode, Phase};
 use super::*;
 
+/// A Xoodyak instance in unkeyed (hash) mode.
+///
+/// Used for cryptographic hashing and generating arbitrary-length output (extendable-output function).
 #[derive(Clone, Debug)]
 pub struct XoodyakHash {
     state: Xoodoo,
@@ -8,6 +11,7 @@ pub struct XoodyakHash {
 }
 
 impl XoodyakHash {
+    /// Creates a new unkeyed Xoodyak hashing instance.
     pub fn new() -> Self {
         XoodyakHash {
             state: Xoodoo::default(),
