@@ -10,14 +10,16 @@ impl Xoodoo {
         let rkeys = ROUND_KEYS.as_ptr();
         let rkeys_end = unsafe { rkeys.add(12) };
 
-        let mut state_ptr = st_words.as_mut_ptr();
-        let mut rkeys_ptr = rkeys;
+        let state_ptr = st_words.as_mut_ptr();
+        let rkeys_ptr = rkeys;
 
         unsafe {
             asm!(
-                // Allocate 32 bytes on the stack for storing columns parity and metadata
-                "addi    sp, sp, -32",
-                // Store state_ptr, rkeys_ptr, rkeys_end
+                // Allocate 40 bytes on the stack for storing columns parity, metadata, and s0/s1
+                "addi    sp, sp, -40",
+                // Store s0, s1, state_ptr, rkeys_ptr, rkeys_end
+                "sw      s0, 28(sp)",
+                "sw      s1, 32(sp)",
                 "sw      a0, 16(sp)",
                 "sw      a1, 20(sp)",
                 "sw      a2, 24(sp)",
@@ -37,103 +39,94 @@ impl Xoodoo {
                 "2:", // Loop start label
 
                 // Theta step
-                "lw      t2, 16(sp)",          // Load state pointer
 
                 // Column 0: P0 = A00 ^ s0 (A10) ^ a4 (A20)
-                "lw      ra, 0(t2)",
+                "lw      ra, 0(a0)",
                 "xor     ra, ra, s0",
                 "xor     ra, ra, a4",
                 "sw      ra, 0(sp)",
 
                 // Column 1: P1 = A01 ^ s1 (A11) ^ a5 (A21)
-                "lw      ra, 4(t2)",
+                "lw      ra, 4(a0)",
                 "xor     ra, ra, s1",
                 "xor     ra, ra, a5",
                 "sw      ra, 4(sp)",
 
                 // Column 2: P2 = A02 ^ a2 (A12) ^ t0 (A22)
-                "lw      ra, 8(t2)",
+                "lw      ra, 8(a0)",
                 "xor     ra, ra, a2",
                 "xor     ra, ra, t0",
                 "sw      ra, 8(sp)",
 
                 // Column 3: P3 = A03 ^ a3 (A13) ^ t1 (A23)
-                "lw      ra, 12(t2)",
+                "lw      ra, 12(a0)",
                 "xor     ra, ra, a3",
                 "xor     ra, ra, t1",
                 "sw      ra, 12(sp)",
 
                 // --- Column 0 (uses P3 from 12(sp)) ---
                 "lw      t2, 12(sp)",
-                "slli    a0, t2, 5",
+                "slli    ra, t2, 5",
                 "srli    t2, t2, 27",
-                "or      a0, a0, t2",
+                "or      ra, ra, t2",          // ra = ROTL32(P3, 5)
                 "lw      t2, 12(sp)",
-                "slli    ra, t2, 14",
+                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      ra, ra, t2",
-                "xor     a0, a0, ra",          // a0 = E0
+                "or      t2, t2, ra",          // t2 = E0
 
-                "xor     s0, s0, a0",          // s0 (A10) ^= E0
-                "xor     a4, a4, a0",          // a4 (A20) ^= E0
-                "lw      t2, 16(sp)",          // load state pointer
-                "lw      ra, 0(t2)",
-                "xor     ra, ra, a0",
-                "sw      ra, 0(t2)",           // A00 ^= E0
+                "xor     s0, s0, t2",          // s0 (A10) ^= E0
+                "xor     a4, a4, t2",          // a4 (A20) ^= E0
+                "lw      ra, 0(a0)",
+                "xor     ra, ra, t2",
+                "sw      ra, 0(a0)",           // A00 ^= E0
 
                 // --- Column 1 (uses P0 from 0(sp)) ---
                 "lw      t2, 0(sp)",
-                "slli    a0, t2, 5",
+                "slli    ra, t2, 5",
                 "srli    t2, t2, 27",
-                "or      a0, a0, t2",
+                "or      ra, ra, t2",          // ra = ROTL32(P0, 5)
                 "lw      t2, 0(sp)",
-                "slli    ra, t2, 14",
+                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      ra, ra, t2",
-                "xor     a0, a0, ra",          // a0 = E1
+                "or      t2, t2, ra",          // t2 = E1
 
-                "xor     s1, s1, a0",          // s1 (A11) ^= E1
-                "xor     a5, a5, a0",          // a5 (A21) ^= E1
-                "lw      t2, 16(sp)",
-                "lw      ra, 4(t2)",
-                "xor     ra, ra, a0",
-                "sw      ra, 4(t2)",           // A01 ^= E1
+                "xor     s1, s1, t2",          // s1 (A11) ^= E1
+                "xor     a5, a5, t2",          // a5 (A21) ^= E1
+                "lw      ra, 4(a0)",
+                "xor     ra, ra, t2",
+                "sw      ra, 4(a0)",           // A01 ^= E1
 
                 // --- Column 2 (uses P1 from 4(sp)) ---
                 "lw      t2, 4(sp)",
-                "slli    a0, t2, 5",
+                "slli    ra, t2, 5",
                 "srli    t2, t2, 27",
-                "or      a0, a0, t2",
+                "or      ra, ra, t2",          // ra = ROTL32(P1, 5)
                 "lw      t2, 4(sp)",
-                "slli    ra, t2, 14",
+                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      ra, ra, t2",
-                "xor     a0, a0, ra",          // a0 = E2
+                "or      t2, t2, ra",          // t2 = E2
 
-                "xor     a2, a2, a0",          // a2 (A12) ^= E2
-                "xor     t0, t0, a0",          // t0 (A22) ^= E2
-                "lw      t2, 16(sp)",
-                "lw      ra, 8(t2)",
-                "xor     ra, ra, a0",
-                "sw      ra, 8(t2)",           // A02 ^= E2
+                "xor     a2, a2, t2",          // a2 (A12) ^= E2
+                "xor     t0, t0, t2",          // t0 (A22) ^= E2
+                "lw      ra, 8(a0)",
+                "xor     ra, ra, t2",
+                "sw      ra, 8(a0)",           // A02 ^= E2
 
                 // --- Column 3 (uses P2 from 8(sp)) ---
                 "lw      t2, 8(sp)",
-                "slli    a0, t2, 5",
+                "slli    ra, t2, 5",
                 "srli    t2, t2, 27",
-                "or      a0, a0, t2",
+                "or      ra, ra, t2",          // ra = ROTL32(P2, 5)
                 "lw      t2, 8(sp)",
-                "slli    ra, t2, 14",
+                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      ra, ra, t2",
-                "xor     a0, a0, ra",          // a0 = E3
+                "or      t2, t2, ra",          // t2 = E3
 
-                "xor     a3, a3, a0",          // a3 (A13) ^= E3
-                "xor     t1, t1, a0",          // t1 (A23) ^= E3
-                "lw      t2, 16(sp)",
-                "lw      ra, 12(t2)",
-                "xor     ra, ra, a0",
-                "sw      ra, 12(t2)",          // A03 ^= E3
+                "xor     a3, a3, t2",          // a3 (A13) ^= E3
+                "xor     t1, t1, t2",          // t1 (A23) ^= E3
+                "lw      ra, 12(a0)",
+                "xor     ra, ra, t2",
+                "sw      ra, 12(a0)",          // A03 ^= E3
 
                 // Rho-west: Plane Shift Row 1 & Rotate Row 2
                 // Shift Row 1: (s0, s1, a2, a3) <- (a3, s0, s1, a2)
@@ -170,13 +163,11 @@ impl Xoodoo {
                 "addi    t2, t2, 4",
                 "sw      t2, 20(sp)",          // Store updated RC_ptr
 
-                "lw      a0, 16(sp)",          // Load state pointer
                 "lw      a1, 0(a0)",           // A00
                 "xor     a1, a1, ra",          // A00 ^= rc
                 "sw      a1, 0(a0)",
 
                 // Chi: Non-linear Step (on Columns)
-                "lw      a0, 16(sp)",          // Load state pointer
 
                 // --- Column 0 ---
                 "lw      t2, 0(a0)",           // t2 = A00
@@ -186,11 +177,10 @@ impl Xoodoo {
                 "not     a1, a4",
                 "and     a1, a1, t2",
                 "xor     a1, a1, s0",          // a1 = B1
-                "not     a0, t2",
-                "and     a0, a0, s0",
-                "xor     a4, a4, a0",          // a4 = B2 (A20 updated)
+                "not     t2, t2",
+                "and     t2, t2, s0",
+                "xor     a4, a4, t2",          // a4 = B2 (A20 updated)
                 "mv      s0, a1",              // s0 = B1 (A10 updated)
-                "lw      a0, 16(sp)",
                 "sw      ra, 0(a0)",           // A00 = B0
 
                 // --- Column 1 ---
@@ -201,11 +191,10 @@ impl Xoodoo {
                 "not     a1, a5",
                 "and     a1, a1, t2",
                 "xor     a1, a1, s1",          // a1 = B1
-                "not     a0, t2",
-                "and     a0, a0, s1",
-                "xor     a5, a5, a0",          // a5 = B2 (A21 updated)
+                "not     t2, t2",
+                "and     t2, t2, s1",
+                "xor     a5, a5, t2",          // a5 = B2 (A21 updated)
                 "mv      s1, a1",              // s1 = B1 (A11 updated)
-                "lw      a0, 16(sp)",
                 "sw      ra, 4(a0)",           // A01 = B0
 
                 // --- Column 2 ---
@@ -216,11 +205,10 @@ impl Xoodoo {
                 "not     a1, t0",
                 "and     a1, a1, t2",
                 "xor     a1, a1, a2",          // a1 = B1
-                "not     a0, t2",
-                "and     a0, a0, a2",
-                "xor     t0, t0, a0",          // t0 = B2 (A22 updated)
+                "not     t2, t2",
+                "and     t2, t2, a2",
+                "xor     t0, t0, t2",          // t0 = B2 (A22 updated)
                 "mv      a2, a1",              // a2 = B1 (A12 updated)
-                "lw      a0, 16(sp)",
                 "sw      ra, 8(a0)",           // A02 = B0
 
                 // --- Column 3 ---
@@ -231,11 +219,10 @@ impl Xoodoo {
                 "not     a1, t1",
                 "and     a1, a1, t2",
                 "xor     a1, a1, a3",          // a1 = B1
-                "not     a0, t2",
-                "and     a0, a0, a3",
-                "xor     t1, t1, a0",          // t1 = B2 (A23 updated)
+                "not     t2, t2",
+                "and     t2, t2, a3",
+                "xor     t1, t1, t2",          // t1 = B2 (A23 updated)
                 "mv      a3, a1",              // a3 = B1 (A13 updated)
-                "lw      a0, 16(sp)",
                 "sw      ra, 12(a0)",          // A03 = B0
 
                 // Rho-east: Plane Shift & Rotate Rows
@@ -281,9 +268,6 @@ impl Xoodoo {
                 "lw      ra, 24(sp)",          // RC_end
                 "bne     t2, ra, 2b",
 
-                // Save state back to memory
-                "lw      a0, 16(sp)",          // Load state pointer
-
                 // Write Row 1 (s0, s1, a2, a3)
                 "sw      s0, 16(a0)",
                 "sw      s1, 20(a0)",
@@ -296,17 +280,18 @@ impl Xoodoo {
                 "sw      t0, 40(a0)",
                 "sw      t1, 44(a0)",
 
+                // Restore s0 and s1
+                "lw      s0, 28(sp)",
+                "lw      s1, 32(sp)",
                 // Deallocate stack space
-                "addi    sp, sp, 32",
+                "addi    sp, sp, 40",
 
                 inout("a0") state_ptr => _,
                 inout("a1") rkeys_ptr => _,
                 inout("a2") rkeys_end => _,
                 out("ra") _,
                 out("t0") _, out("t1") _, out("t2") _,
-                out("s0") _, out("s1") _,
                 out("a3") _, out("a4") _, out("a5") _,
-                options(nostack),
             );
         }
     }
