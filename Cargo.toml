@@ -7,8 +7,8 @@ description = "A lightweight, zero-allocation implementation of the Xoodyak cryp
 readme = "README.md"
 keywords = ["xoodyak", "embedded", "cortex-m", "riscv", "aead"]
 license = "MIT"
-homepage = "https://github.com/midnight-wonderer/micro-xoodyak"
-repository = "https://github.com/midnight-wonderer/micro-xoodyak"
+homepage = "https://github.com/midnight-wonderer/micro-xoodyak.rs"
+repository = "https://github.com/midnight-wonderer/micro-xoodyak.rs"
 categories = ["embedded", "cryptography", "no-std", "no-std::no-alloc"]
 
 [features]
