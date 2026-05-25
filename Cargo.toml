@@ -2,7 +2,7 @@
 name = "xoodyak"
 version = "0.8.4"
 authors = ["Frank Denis <github@pureftpd.org>"]
-edition = "2018"
+edition = "2024"
 description = "Xoodyak / Xoodoo - A versatile cryptographic scheme that can be used for hashing, encryption, MAC computation and authenticated encryption."
 readme = "README.md"
 keywords = ["crypto", "xoodyak", "xoodoo", "cyclist"]
@@ -12,8 +12,8 @@ repository = "https://github.com/jedisct1/rust-xoodyak"
 categories = ["no-std", "cryptography", "wasm"]
 
 [features]
-default = ["std"]
-std = ["zeroize/alloc"]
+default = []
+alloc = ["zeroize/alloc"]
 
 [dependencies]
 zeroize = { version = "1.8", default-features = false }
