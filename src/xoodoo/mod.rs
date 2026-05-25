@@ -7,9 +7,9 @@ use zeroize::Zeroize;
     all(target_arch = "arm", target_endian = "little", any(thumb1, thumb2)),
 )))]
 mod impl_portable;
-#[cfg(all(target_arch = "riscv32", not(target_abi = "ilp32e")))]
+#[cfg(all(target_arch = "riscv32", riscv32_std))]
 mod impl_riscv32;
-#[cfg(all(target_arch = "riscv32", target_abi = "ilp32e"))]
+#[cfg(all(target_arch = "riscv32", riscv32_e))]
 mod impl_riscv32_e;
 #[cfg(all(target_arch = "arm", target_endian = "little", thumb1))]
 mod impl_thumb1;
