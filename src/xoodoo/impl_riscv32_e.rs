@@ -70,9 +70,11 @@ impl Xoodoo {
                 "srli    t2, t2, 27",
                 "or      ra, ra, t2",          // ra = ROTL32(P3, 5)
                 "lw      t2, 12(sp)",
-                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      t2, t2, ra",          // t2 = E0
+                "xor     ra, ra, t2",
+                "lw      t2, 12(sp)",
+                "slli    t2, t2, 14",
+                "xor     t2, t2, ra",          // t2 = E0
 
                 "xor     s0, s0, t2",          // s0 (A10) ^= E0
                 "xor     a4, a4, t2",          // a4 (A20) ^= E0
@@ -86,9 +88,11 @@ impl Xoodoo {
                 "srli    t2, t2, 27",
                 "or      ra, ra, t2",          // ra = ROTL32(P0, 5)
                 "lw      t2, 0(sp)",
-                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      t2, t2, ra",          // t2 = E1
+                "xor     ra, ra, t2",
+                "lw      t2, 0(sp)",
+                "slli    t2, t2, 14",
+                "xor     t2, t2, ra",          // t2 = E1
 
                 "xor     s1, s1, t2",          // s1 (A11) ^= E1
                 "xor     a5, a5, t2",          // a5 (A21) ^= E1
@@ -102,9 +106,11 @@ impl Xoodoo {
                 "srli    t2, t2, 27",
                 "or      ra, ra, t2",          // ra = ROTL32(P1, 5)
                 "lw      t2, 4(sp)",
-                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      t2, t2, ra",          // t2 = E2
+                "xor     ra, ra, t2",
+                "lw      t2, 4(sp)",
+                "slli    t2, t2, 14",
+                "xor     t2, t2, ra",          // t2 = E2
 
                 "xor     a2, a2, t2",          // a2 (A12) ^= E2
                 "xor     t0, t0, t2",          // t0 (A22) ^= E2
@@ -118,9 +124,11 @@ impl Xoodoo {
                 "srli    t2, t2, 27",
                 "or      ra, ra, t2",          // ra = ROTL32(P2, 5)
                 "lw      t2, 8(sp)",
-                "slli    t2, t2, 14",
                 "srli    t2, t2, 18",
-                "or      t2, t2, ra",          // t2 = E3
+                "xor     ra, ra, t2",
+                "lw      t2, 8(sp)",
+                "slli    t2, t2, 14",
+                "xor     t2, t2, ra",          // t2 = E3
 
                 "xor     a3, a3, t2",          // a3 (A13) ^= E3
                 "xor     t1, t1, t2",          // t1 (A23) ^= E3
