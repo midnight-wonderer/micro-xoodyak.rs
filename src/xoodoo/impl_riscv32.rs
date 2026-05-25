@@ -1,6 +1,6 @@
 use core::arch::asm;
 
-use super::{Xoodoo, ROUND_KEYS};
+use super::{ROUND_KEYS, Xoodoo};
 
 impl Xoodoo {
     /// Dynamically binds the 12-word state to registers for optimal compiler allocation.

@@ -1,6 +1,6 @@
 use core::arch::asm;
 
-use super::{Xoodoo, ROUND_KEYS};
+use super::{ROUND_KEYS, Xoodoo};
 
 impl Xoodoo {
     /// Highly optimized Xoodoo permutation for ARMv7-M (Thumb-2).

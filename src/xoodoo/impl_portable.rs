@@ -1,4 +1,4 @@
-use super::{Xoodoo, ROUND_KEYS};
+use super::{ROUND_KEYS, Xoodoo};
 
 impl Xoodoo {
     #[inline(always)]
