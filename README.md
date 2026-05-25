@@ -20,7 +20,7 @@ Xoodyak is a versatile primitive designed by the Keccak team (creators of SHA-3)
 * **Optimized for 32-bit Hardware**: Native assembly and architecture-specific implementations for:
   * ARM Thumb-1 (e.g., Cortex-M0, Cortex-M0+, Cortex-M1)
   * ARM Thumb-2 (e.g., Cortex-M3, Cortex-M4, Cortex-M7, Cortex-M33)
-  * RISC-V 32-bit (e.g., RV32IMAC)
+  * RISC-V 32-bit (e.g., RV32I, RV32E, ESP32-C3, etc.)
 * **Security First**: Automatic zeroization of sensitive internal state on drop using the `zeroize` crate.
 * **Flexible AEAD**: Supports both in-place and buffer-to-buffer authenticated encryption with attached or detached tags.
 * **Streaming Support**: Easily squeeze and absorb data in chunks.
@@ -131,7 +131,8 @@ MicroXoodyak automatically selects the most optimized implementation path at com
 | --- | --- | --- |
 | ARM Thumb-1 | Optimized Thumb-1 Assembly | Cortex-M0, Cortex-M0+, Cortex-M1 |
 | ARM Thumb-2 | Optimized Thumb-2 Assembly | Cortex-M3, Cortex-M4, Cortex-M7, Cortex-M33, ARMv7-R, ARMv8-M |
-| RISC-V 32-bit | Optimized RV32 Assembly | RV32IMAC, ESP32-C3, etc. |
+| RISC-V 32-bit (RV32I) | Optimized RV32I Assembly (32 registers) | RV32IMAC, ESP32-C3, FE310, etc. |
+| RISC-V 32-bit (RV32E) | Optimized RV32E Assembly (16 registers) | RV32EC, low-power/budget embedded MCUs |
 | x86_64 | Optimized SIMD/Vector | Intel/AMD 64-bit platforms |
 | Others | Portable Rust Fallback | WASM, other architectures |
 
